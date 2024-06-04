@@ -18,7 +18,6 @@
 
   <ItemGroup>
     <Folder Include="DataSourceHandler\" />
-    <Folder Include="Models\Requests\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png" />

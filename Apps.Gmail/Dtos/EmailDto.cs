@@ -6,7 +6,7 @@ namespace Apps.Gmail.Dtos
     {
         public EmailDto(Message message)
         {
-            Subject = message.Payload.Headers.First(x => x.Name == "Subject").Value;
+            Subject = message.Payload.Headers.FirstOrDefault(x => x.Name == "Subject")?.Value ?? "";
         }
 
         public string Subject { get; set; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Blackbird.Applications.Sdk.Common.Files;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,8 @@ namespace Apps.Gmail.Models.Requests
 
         public string? Subject { get; set; }
 
-        public string Body { get; set; }
+        public string? Message { get; set; }
+
+        public List<FileReference>? Attachments { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Invocation;
+using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using Google.Apis.Gmail.v1.Data;
 using MimeKit;
 using RestSharp;
@@ -19,8 +20,11 @@ namespace Apps.Gmail.Actions
     [ActionList]
     public class EmailActions : GmailInvocable
     {
-        public EmailActions(InvocationContext invocationContext) : base(invocationContext)
+        private readonly IFileManagementClient _fileManagementClient;
+
+        public EmailActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) : base(invocationContext)
         {
+            _fileManagementClient = fileManagementClient;
         }
 
         [Action("Search emails", Description = "Search emails. Specify query to fetch emails or you will get last 10 emails")]
@@ -42,10 +46,20 @@ namespace Apps.Gmail.Actions
         }
 
         [Action("Send email", Description = "Send email")]
-        public async Task<EmailDto> SendEmail([ActionParameter] SendEmailRequest getEmailRequest)
+        public async Task<EmailDto> SendEmail([ActionParameter] SendEmailRequest sendEmailRequest)
         {
-            var mailMessage = new MailMessage("defaultmakarenko@gmail.com", getEmailRequest.To, getEmailRequest.Subject, getEmailRequest.Body);
-
+            var myProfile = Client.Users.GetProfile("me");
+            var mailMessage = new MailMessage(myProfile.UserId, sendEmailRequest.To, sendEmailRequest.Subject, sendEmailRequest.Message);
+            
+            if(sendEmailRequest.Attachments != null)
+            {
+                foreach (var file in sendEmailRequest.Attachments)
+                {
+                    using var fileBytes = await _fileManagementClient.DownloadAsync(file);
+                    mailMessage.Attachments.Add(new Attachment(fileBytes, file.Name));
+                }
+            }
+            
             var mimeMessage = MimeMessage.CreateFromMailMessage(mailMessage);
 
             using var mailMessageStream = new MemoryStream();

@@ -16,10 +16,6 @@
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.68.0.3427" />
     <PackageReference Include="RestSharp" Version="111.2.0" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="DataSourceHandler\" />
-  </ItemGroup>
   <ItemGroup>
     <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.png" />
   </ItemGroup>

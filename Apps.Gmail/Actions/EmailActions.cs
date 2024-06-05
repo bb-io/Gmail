@@ -7,6 +7,7 @@ using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using RestSharp;
+using System;
 
 namespace Apps.Gmail.Actions
 {
@@ -17,16 +18,15 @@ namespace Apps.Gmail.Actions
         {
         }
 
-        [Action("Search emails", Description = "Search emails")]
+        [Action("Search emails", Description = "Search emails. Specify query to fetch emails or you will get last 10 emails")]
         public async Task<SearchEmailsResponse> SearchEmails([ActionParameter] SearchEmailsRequest searchEmailsRequest)
         {
-            var emailsRequest = Client.Users.Messages.List(searchEmailsRequest.Email);
+            var emailsRequest = Client.Users.Messages.List("me");
+            if (!string.IsNullOrWhiteSpace(searchEmailsRequest.Query))
+                emailsRequest.Q = searchEmailsRequest.Query;
             var emails = await emailsRequest.ExecuteAsync();
-
-
-            var emailTest = Client.Users.Messages.Get("me", emails.Messages.First().Id).Execute();
-
-            return new() { Emails = emails.Messages.Select(x => new EmailDto(x)).ToList() };
+            var foundEmails = emails.Messages.Take(10).Select(x => GetEmail(new GetEmailRequest() { EmailId = x.Id }).Result).ToList();
+            return new() { Emails = foundEmails };
         }
 
         [Action("Get email", Description = "Get email")]

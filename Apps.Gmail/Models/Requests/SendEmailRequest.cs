@@ -15,6 +15,8 @@ namespace Apps.Gmail.Models.Requests
 
         public string? Message { get; set; }
 
+        public List<string>? CC { get; set; }
+
         public List<FileReference>? Attachments { get; set; }
     }
 }

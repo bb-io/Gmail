@@ -10,7 +10,8 @@ namespace Apps.Gmail.Dtos
             Id = message.Id;
             Subject = message.Payload.Headers.FirstOrDefault(x => x.Name == "Subject")?.Value ?? "";
 
-            var from = message.Payload.Headers.FirstOrDefault(x => x.Name == "From")?.Value?.Split(" <")[0] ?? "";
+            var fromFull = message.Payload.Headers.FirstOrDefault(x => x.Name == "From")?.Value;
+            var from = (fromFull != null && fromFull.Contains(" <")) ? fromFull.Split(" <")[0] : fromFull;
             Name = $"{from} {Subject}";
         }
 

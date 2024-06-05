@@ -50,12 +50,21 @@ namespace Apps.Gmail.Actions
         {
             var myProfile = await Client.Users.GetProfile("me").ExecuteAsync();
             var mailMessage = new MailMessage(myProfile.EmailAddress, sendEmailRequest.To, sendEmailRequest.Subject, sendEmailRequest.Message);
-            
-            if(sendEmailRequest.Attachments != null)
+
+            if(sendEmailRequest.CC != null)
+            {
+                foreach(var ccEmail in sendEmailRequest.CC)
+                {
+                    mailMessage.CC.Add(ccEmail);
+                }        
+            }
+
+            if (sendEmailRequest.Attachments != null)
             {
                 foreach (var file in sendEmailRequest.Attachments)
                 {
                     using var fileBytes = await _fileManagementClient.DownloadAsync(file);
+                    fileBytes.Position = 0;
                     mailMessage.Attachments.Add(new Attachment(fileBytes, file.Name));
                 }
             }

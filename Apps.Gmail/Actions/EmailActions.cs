@@ -6,8 +6,13 @@ using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Invocation;
+using Google.Apis.Gmail.v1.Data;
+using MimeKit;
 using RestSharp;
 using System;
+using System.IO;
+using System.Net.Mail;
+using System.Text;
 
 namespace Apps.Gmail.Actions
 {
@@ -33,6 +38,25 @@ namespace Apps.Gmail.Actions
         public async Task<EmailDto> GetEmail([ActionParameter] GetEmailRequest getEmailRequest)
         {
             var email = await Client.Users.Messages.Get("me", getEmailRequest.EmailId).ExecuteAsync();
+            return new(email);
+        }
+
+        [Action("Send email", Description = "Send email")]
+        public async Task<EmailDto> SendEmail([ActionParameter] SendEmailRequest getEmailRequest)
+        {
+            var mailMessage = new MailMessage("defaultmakarenko@gmail.com", getEmailRequest.To, getEmailRequest.Subject, getEmailRequest.Body);
+
+            var mimeMessage = MimeMessage.CreateFromMailMessage(mailMessage);
+
+            using var mailMessageStream = new MemoryStream();
+            mimeMessage.WriteTo(mailMessageStream);
+            var base64Content = Convert.ToBase64String(mailMessageStream.ToArray());
+
+            var message = new Message()
+            {
+                Raw = base64Content
+            };
+            var email = await Client.Users.Messages.Send(message, "me").ExecuteAsync();
             return new(email);
         }
     }

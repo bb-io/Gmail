@@ -48,8 +48,8 @@ namespace Apps.Gmail.Actions
         [Action("Send email", Description = "Send email")]
         public async Task<EmailDto> SendEmail([ActionParameter] SendEmailRequest sendEmailRequest)
         {
-            var myProfile = Client.Users.GetProfile("me");
-            var mailMessage = new MailMessage(myProfile.UserId, sendEmailRequest.To, sendEmailRequest.Subject, sendEmailRequest.Message);
+            var myProfile = await Client.Users.GetProfile("me").ExecuteAsync();
+            var mailMessage = new MailMessage(myProfile.EmailAddress, sendEmailRequest.To, sendEmailRequest.Subject, sendEmailRequest.Message);
             
             if(sendEmailRequest.Attachments != null)
             {

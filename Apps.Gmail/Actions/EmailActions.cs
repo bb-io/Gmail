@@ -63,9 +63,8 @@ namespace Apps.Gmail.Actions
             {
                 foreach (var file in sendEmailRequest.Attachments)
                 {
-                    using var fileBytes = await _fileManagementClient.DownloadAsync(file);
-                    fileBytes.Position = 0;
-                    mailMessage.Attachments.Add(new Attachment(fileBytes, file.Name));
+                    var fileStream = await _fileManagementClient.DownloadAsync(file);
+                    mailMessage.Attachments.Add(new Attachment(fileStream, file.Name));
                 }
             }
             

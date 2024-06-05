@@ -79,7 +79,9 @@ namespace Apps.Gmail.Actions
                 Raw = base64Content
             };
             var email = await Client.Users.Messages.Send(message, "me").ExecuteAsync();
-            return new(email);
+
+            var fullEmail = await Client.Users.Messages.Get("me", email.Id).ExecuteAsync();
+            return new(fullEmail);
         }
     }
 }

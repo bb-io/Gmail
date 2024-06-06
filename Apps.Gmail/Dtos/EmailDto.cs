@@ -1,5 +1,5 @@
-﻿using Google.Apis.Gmail.v1.Data;
-using System.ComponentModel.DataAnnotations;
+﻿using Blackbird.Applications.Sdk.Common;
+using Google.Apis.Gmail.v1.Data;
 
 namespace Apps.Gmail.Dtos
 {
@@ -12,13 +12,14 @@ namespace Apps.Gmail.Dtos
 
             var fromFull = message.Payload.Headers.FirstOrDefault(x => x.Name == "From")?.Value;
             var from = (fromFull != null && fromFull.Contains(" <")) ? fromFull.Split(" <")[0] : fromFull;
-            Name = $"{from} {Subject}";
+            DisplayName = $"{from} {Subject}";
         }
 
         public string Id { get; set; }
 
         public string Subject { get; set; }
 
-        public string Name { get; set; }
+        [Display("Display name")]
+        public string DisplayName { get; set; }
     }
 }

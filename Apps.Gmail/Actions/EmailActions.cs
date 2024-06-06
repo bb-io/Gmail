@@ -67,7 +67,7 @@ namespace Apps.Gmail.Actions
                     mailMessage.Attachments.Add(new Attachment(fileStream, file.Name));
                 }
             }
-            
+
             var mimeMessage = MimeMessage.CreateFromMailMessage(mailMessage);
 
             using var mailMessageStream = new MemoryStream();

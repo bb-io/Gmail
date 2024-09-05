@@ -1,4 +1,5 @@
 ﻿using Apps.Gmail.Dtos;
+using Blackbird.Applications.Sdk.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,7 @@ namespace Apps.Gmail.Models.Responses
 {
     public class SearchEmailsResponse
     {
-        public List<EmailDto> Emails { get; set; }
+        [Display("Email IDs")]
+        public IEnumerable<string> EmailIds { get; set; }
     }
 }

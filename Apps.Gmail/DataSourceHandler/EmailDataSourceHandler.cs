@@ -19,7 +19,7 @@ namespace Apps.Gmail.DataSourceHandler
                 emailsRequest.Q = context.SearchString;
             var emails = await emailsRequest.ExecuteAsync();
             var foundEmails = emails.Messages.Take(10).Select(x => GetFullEmail(x.Id));
-            return foundEmails.ToDictionary(k => k.Id, v => v.Name);
+            return foundEmails.ToDictionary(k => k.Id, v => v.Subject);
         }
 
         private EmailDto GetFullEmail(string emailId)

@@ -5,6 +5,7 @@ using Apps.Gmail.Models.Responses;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Authentication;
+using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using Google.Apis.Gmail.v1.Data;
@@ -13,6 +14,7 @@ using RestSharp;
 using System;
 using System.IO;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Text;
 
 namespace Apps.Gmail.Actions
@@ -27,25 +29,34 @@ namespace Apps.Gmail.Actions
             _fileManagementClient = fileManagementClient;
         }
 
-        [Action("Search emails", Description = "Search emails. Specify query to fetch emails or you will get last 10 emails")]
+        [Action("Search emails", Description = "Returns a list of IDs which can be used in conjunction with 'Get email'. Add an optional query to narrow your search. ")]
         public async Task<SearchEmailsResponse> SearchEmails([ActionParameter] SearchEmailsRequest searchEmailsRequest)
         {
             var emailsRequest = Client.Users.Messages.List("me");
             if (!string.IsNullOrWhiteSpace(searchEmailsRequest.Query))
                 emailsRequest.Q = searchEmailsRequest.Query;
             var emails = await emailsRequest.ExecuteAsync();
-            var foundEmails = emails.Messages.Take(10).Select(x => GetEmail(new GetEmailRequest() { EmailId = x.Id }).Result).ToList();
-            return new() { Emails = foundEmails };
+            return new() { EmailIds = emails.Messages.Select(x => x.Id) };
         }
 
-        [Action("Get email", Description = "Get email")]
+        [Action("Get email", Description = "Returns email metadata, message and all attachments")]
         public async Task<EmailDto> GetEmail([ActionParameter] GetEmailRequest getEmailRequest)
         {
             var email = await Client.Users.Messages.Get("me", getEmailRequest.EmailId).ExecuteAsync();
-            return new(email);
+            var attachmentParts = email.Payload.Parts.Where(x => !string.IsNullOrEmpty(x.Filename));
+            var attachments = new List<FileReference>();
+            foreach (var part in attachmentParts)
+            {
+                var att = await Client.Users.Messages.Attachments.Get("me", getEmailRequest.EmailId, part.Body.AttachmentId).ExecuteAsync();
+                var base64EncodedBytes = Convert.FromBase64String(att.Data);
+                var fileBytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(base64EncodedBytes));
+                var file = await _fileManagementClient.UploadAsync(new MemoryStream(fileBytes), part.MimeType, part.Filename);
+                attachments.Add(file);
+            }
+            return new EmailDto(email) { Attachments = attachments };
         }
 
-        [Action("Send email", Description = "Send email")]
+        [Action("Send email", Description = "Sends an email, including attachments")]
         public async Task<EmailDto> SendEmail([ActionParameter] SendEmailRequest sendEmailRequest)
         {
             var myProfile = await Client.Users.GetProfile("me").ExecuteAsync();

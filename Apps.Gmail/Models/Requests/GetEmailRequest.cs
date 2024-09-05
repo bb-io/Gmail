@@ -7,7 +7,6 @@ namespace Apps.Gmail.Models.Requests
     public class GetEmailRequest
     {
         [Display("Email ID")]
-        [DataSource(typeof(EmailDataSourceHandler))]
         public string EmailId { get; set; }
     }
 }

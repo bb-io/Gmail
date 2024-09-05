@@ -91,8 +91,7 @@ namespace Apps.Gmail.Actions
             };
             var email = await Client.Users.Messages.Send(message, "me").ExecuteAsync();
 
-            var fullEmail = await Client.Users.Messages.Get("me", email.Id).ExecuteAsync();
-            return new(fullEmail);
+            return await GetEmail(new GetEmailRequest { EmailId = email.Id});
         }
     }
 }

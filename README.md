@@ -22,6 +22,8 @@ Before you can connect you need to make sure that:
 4. Click _Authorize connection_.
 5. Establish the Gmail connection via OAuth.
 
+![connection](image/README/1725554354745.png)
+
 ## Actions
 
 - **Search emails** Returns a list of IDs which can be used in conjunction with 'Get email'. Add an optional query to narrow your search. Supports the same query format as the Gmail search box. For example, "from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread".

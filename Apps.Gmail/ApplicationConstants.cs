@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Apps.Gmail
+﻿namespace Apps.Gmail
 {
     public class ApplicationConstants
     {
@@ -16,4 +10,5 @@ namespace Apps.Gmail
 
         public const string BlackbirdToken = "#{GOOGLEDRIVE_BLACKBIRD_TOKEN}#";
     }
+
 }

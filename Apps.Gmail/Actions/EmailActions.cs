@@ -48,7 +48,7 @@ namespace Apps.Gmail.Actions
             foreach (var part in attachmentParts)
             {
                 var att = await Client.Users.Messages.Attachments.Get("me", getEmailRequest.EmailId, part.Body.AttachmentId).ExecuteAsync();
-                var base64EncodedBytes = Convert.FromBase64String(att.Data);
+                var base64EncodedBytes = Convert.FromBase64String(att.Data.Replace("-", "+").Replace("_", "/"));
                 var fileBytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(base64EncodedBytes));
                 var file = await _fileManagementClient.UploadAsync(new MemoryStream(fileBytes), part.MimeType, part.Filename);
                 attachments.Add(file);

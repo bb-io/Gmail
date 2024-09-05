@@ -1,6 +1,7 @@
 ﻿using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Files;
 using Google.Apis.Gmail.v1.Data;
+using System.Text;
 
 namespace Apps.Gmail.Dtos
 {
@@ -15,9 +16,9 @@ namespace Apps.Gmail.Dtos
             From = (fromFull != null && fromFull.Contains(" <")) ? fromFull.Split(" <")[0] : fromFull;
             To = message.Payload.Headers.FirstOrDefault(x => x.Name == "To")?.Value ?? "";
 
-            var messageBase64 = message.Payload.Parts.FirstOrDefault(x => x.MimeType == "text/html")?.Body.Data ?? "";
-            var base64EncodedBytes = System.Convert.FromBase64String(messageBase64);
-            Message = System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+            var messageBase64 = message.Payload.Parts.FirstOrDefault(x => x.MimeType == "text/plain")?.Body.Data ?? "";
+            var base64EncodedBytes = Convert.FromBase64String(messageBase64.Replace("-", "+").Replace("_", "/"));
+            Message = Encoding.UTF8.GetString(base64EncodedBytes);
         }
 
         [Display("ID")]

@@ -32,7 +32,21 @@ Before you can connect you need to make sure that:
 
 ## Events
 
-- **On emails received** Triggered when new emails are received. You can optionally set a query to refine the search. The same query logic as 'Search emails' is used.
+- **On emails received** Triggered when new emails are received. You can optionally set a query to refine the search. The same query logic as 'Search emails' is used. *Note*: this is a polling trigger, therefore you have to set a polling interval and you will receive multiple email IDs. Use "Get email" to get information about each email.
+
+## Examples
+
+Here is an example of a simple Gmail workflow:
+
+![1725608752440](image/README/1725608752440.png)
+
+In this example, the workflow starts when a new batch of emails is polled. All the emails are looped through, the information and attachments for each email are fetched and they are then forwarded to Slack.
+
+A more complicated example is shown here:
+
+![1725609061387](image/README/1725609061387.png)
+
+In this workflow, we create a new Plunet quote for every email we receive (of course we can filter the received emails by certain criteria). All attachments are automatically added to the quote. We then send a confirmation email back to the sender.
 
 ## Feedback
 

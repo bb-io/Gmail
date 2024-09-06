@@ -26,7 +26,7 @@ Before you can connect you need to make sure that:
 
 ## Actions
 
-- **Search emails** Returns a list of IDs which can be used in conjunction with 'Get email'. Add an optional query to narrow your search. Supports the same query format as the Gmail search box. For example, "from:someuser@example.com rfc822msgid:<somemsgid@example.com> is:unread".
+- **Search emails** Returns a list of IDs which can be used in conjunction with 'Get email'. Add an optional query to narrow your search. Supports the same query format as the Gmail search box. For example, "from:someuser@example.com is:unread".
 - **Get email** Returns email metadata, message and all attachments.
 - **Send email** Sends an email, including attachments
 

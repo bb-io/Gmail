@@ -19,9 +19,13 @@ namespace Apps.Gmail.Dtos
             To = (toFull != null && toFull.Contains(" <")) ? toFull.Split(" <")[0] : toFull;
             ToEmail = (toFull != null && toFull.Contains(" <")) ? toFull.Split(" <")[1].TrimEnd('>') : toFull;
 
-            var messageBase64 = message.Payload.Parts.FirstOrDefault(x => x.MimeType == "text/plain")?.Body.Data ?? "";
-            var base64EncodedBytes = Convert.FromBase64String(messageBase64.Replace("-", "+").Replace("_", "/"));
-            Message = Encoding.UTF8.GetString(base64EncodedBytes);
+            var bodyBase64 = message.Payload.Body.Data == null ? (message.Payload.Parts.FirstOrDefault(x => x.MimeType == "text/plain")?.Body.Data ?? "") : message.Payload.Body.Data;
+
+            if (bodyBase64 != null)
+            {
+                var base64EncodedBytes = Convert.FromBase64String(bodyBase64.Replace("-", "+").Replace("_", "/"));
+                Message = Encoding.UTF8.GetString(base64EncodedBytes);
+            }
         }
 
         [Display("ID")]

@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <Product>Gmail</Product>
     <Description>Gmail is a free email service provided by Google.</Description>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <AssemblyName>Apps.Gmail</AssemblyName>
   </PropertyGroup>
 

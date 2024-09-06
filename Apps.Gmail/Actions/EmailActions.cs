@@ -33,6 +33,7 @@ namespace Apps.Gmail.Actions
         public async Task<SearchEmailsResponse> SearchEmails([ActionParameter] SearchEmailsRequest searchEmailsRequest)
         {
             var emailsRequest = Client.Users.Messages.List("me");
+            emailsRequest.LabelIds = new List<string>() { "INBOX" };
             if (!string.IsNullOrWhiteSpace(searchEmailsRequest.Query))
                 emailsRequest.Q = searchEmailsRequest.Query;
             var emails = await emailsRequest.ExecuteAsync();

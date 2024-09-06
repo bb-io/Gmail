@@ -18,6 +18,7 @@ namespace Apps.Gmail.Polling
         public async Task<PollingEventResponse<EmailsMemory, SearchEmailsResponse>> OnEmailsReceived(PollingEventRequest<EmailsMemory> request, [PollingEventParameter] SearchEmailsRequest searchEmailsRequest)
         {
             var emailsRequest = Client.Users.Messages.List("me");
+            emailsRequest.LabelIds = new List<string>() { "INBOX" };
             if (!string.IsNullOrWhiteSpace(searchEmailsRequest.Query))
                 emailsRequest.Q = searchEmailsRequest.Query;
             var emails = await emailsRequest.ExecuteAsync();

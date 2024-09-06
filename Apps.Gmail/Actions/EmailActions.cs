@@ -44,16 +44,21 @@ namespace Apps.Gmail.Actions
         public async Task<EmailDto> GetEmail([ActionParameter] GetEmailRequest getEmailRequest)
         {
             var email = await Client.Users.Messages.Get("me", getEmailRequest.EmailId).ExecuteAsync();
-            var attachmentParts = email.Payload.Parts.Where(x => !string.IsNullOrEmpty(x.Filename));
             var attachments = new List<FileReference>();
-            foreach (var part in attachmentParts)
+
+            if (email.Payload.Parts != null)
             {
-                var att = await Client.Users.Messages.Attachments.Get("me", getEmailRequest.EmailId, part.Body.AttachmentId).ExecuteAsync();
-                var base64EncodedBytes = Convert.FromBase64String(att.Data.Replace("-", "+").Replace("_", "/"));
-                var fileBytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(base64EncodedBytes));
-                var file = await _fileManagementClient.UploadAsync(new MemoryStream(fileBytes), part.MimeType, part.Filename);
-                attachments.Add(file);
+                var attachmentParts = email.Payload.Parts.Where(x => !string.IsNullOrEmpty(x.Filename));
+                foreach (var part in attachmentParts)
+                {
+                    var att = await Client.Users.Messages.Attachments.Get("me", getEmailRequest.EmailId, part.Body.AttachmentId).ExecuteAsync();
+                    var base64EncodedBytes = Convert.FromBase64String(att.Data.Replace("-", "+").Replace("_", "/"));
+                    var fileBytes = Encoding.UTF8.GetBytes(Encoding.UTF8.GetString(base64EncodedBytes));
+                    var file = await _fileManagementClient.UploadAsync(new MemoryStream(fileBytes), part.MimeType, part.Filename);
+                    attachments.Add(file);
+                }
             }
+            
             return new EmailDto(email) { Attachments = attachments };
         }
 

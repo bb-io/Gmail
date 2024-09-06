@@ -17,6 +17,12 @@ namespace Apps.Gmail.Polling
         [PollingEvent("On emails received", Description = "Triggered when new emails are received. You can optionally set a query to refine the search.")]
         public async Task<PollingEventResponse<EmailsMemory, SearchEmailsResponse>> OnEmailsReceived(PollingEventRequest<EmailsMemory> request, [PollingEventParameter] SearchEmailsRequest searchEmailsRequest)
         {
+            var emailsRequest = Client.Users.Messages.List("me");
+            if (!string.IsNullOrWhiteSpace(searchEmailsRequest.Query))
+                emailsRequest.Q = searchEmailsRequest.Query;
+            var emails = await emailsRequest.ExecuteAsync();
+            var ids = emails.Messages.Select(x => x.Id);
+
             if (request.Memory is null)
             {
                 return new()
@@ -24,16 +30,10 @@ namespace Apps.Gmail.Polling
                     FlyBird = false,
                     Memory = new()
                     {
-                        EmailIds = new List<string>(){}
+                        EmailIds = ids
                     }
                 };
-            }
-
-            var emailsRequest = Client.Users.Messages.List("me");
-            if (!string.IsNullOrWhiteSpace(searchEmailsRequest.Query))
-                emailsRequest.Q = searchEmailsRequest.Query;
-            var emails = await emailsRequest.ExecuteAsync();
-            var ids = emails.Messages.Select(x => x.Id);
+            }            
 
             var newIds = ids.Where(x => !request.Memory.EmailIds.Contains(x));
 

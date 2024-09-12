@@ -62,6 +62,12 @@ namespace Apps.Gmail.Actions
             return new EmailDto(email) { Attachments = attachments };
         }
 
+        [Action("Trash email", Description = "Moves an email to the trash folder")]
+        public async Task TrashEmail([ActionParameter] GetEmailRequest getEmailRequest)
+        {
+            await Client.Users.Messages.Trash("me", getEmailRequest.EmailId).ExecuteAsync();            
+        }
+
         [Action("Send email", Description = "Sends an email, including attachments")]
         public async Task<EmailDto> SendEmail([ActionParameter] SendEmailRequest sendEmailRequest)
         {

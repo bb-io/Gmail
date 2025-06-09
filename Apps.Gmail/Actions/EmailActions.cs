@@ -67,7 +67,8 @@ public class EmailActions(InvocationContext invocationContext, IFileManagementCl
     public async Task<EmailDto> SendEmail([ActionParameter] SendEmailRequest sendEmailRequest)
     {
         var myProfile = await ExecuteWithErrorHandlingAsync(Client.Users.GetProfile("me").ExecuteAsync);
-        var mailMessage = new MailMessage(myProfile.EmailAddress, sendEmailRequest.To, sendEmailRequest.Subject, sendEmailRequest.Message);
+        var recepientEmail = sendEmailRequest.To.Trim();
+        var mailMessage = new MailMessage(myProfile.EmailAddress, recepientEmail, sendEmailRequest.Subject, sendEmailRequest.Message);
 
         if(sendEmailRequest.CC != null)
         {

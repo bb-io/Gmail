@@ -1,31 +1,28 @@
 ﻿using Apps.Gmail.Dtos;
 using Apps.Gmail.Invocables;
-using Apps.Gmail.Models.Requests;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 using Blackbird.Applications.Sdk.Common.Invocation;
 
-namespace Apps.Gmail.DataSourceHandler
+namespace Apps.Gmail.DataSourceHandler;
+
+public class EmailDataSourceHandler(InvocationContext invocationContext) : GmailInvocable(invocationContext), IAsyncDataSourceItemHandler
 {
-    public class EmailDataSourceHandler : GmailInvocable, IAsyncDataSourceHandler
+    public async Task<IEnumerable<DataSourceItem>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
     {
-        public EmailDataSourceHandler(InvocationContext invocationContext) : base(invocationContext)
+        var emailsRequest = Client.Users.Messages.List("me");
+        if (!string.IsNullOrWhiteSpace(context.SearchString))
         {
+            emailsRequest.Q = context.SearchString;
         }
 
-        public async Task<Dictionary<string, string>> GetDataAsync(DataSourceContext context, CancellationToken cancellationToken)
-        {
-            var emailsRequest = Client.Users.Messages.List("me");
-            if(!string.IsNullOrWhiteSpace(context.SearchString))
-                emailsRequest.Q = context.SearchString;
-            var emails = await emailsRequest.ExecuteAsync();
-            var foundEmails = emails.Messages.Take(10).Select(x => GetFullEmail(x.Id));
-            return foundEmails.ToDictionary(k => k.Id, v => v.Subject);
-        }
+        var emails = await ExecuteWithErrorHandlingAsync(emailsRequest.ExecuteAsync);
+        var foundEmails = emails.Messages.Select(x => GetFullEmail(x.Id));
+        return foundEmails.Select(k => new DataSourceItem(k.Id, k.Subject));
+    }
 
-        private EmailDto GetFullEmail(string emailId)
-        {
-            var email = Client.Users.Messages.Get("me", emailId).Execute();
-            return new(email);
-        }
+    private EmailDto GetFullEmail(string emailId)
+    {
+        var email = Client.Users.Messages.Get("me", emailId).Execute();
+        return new(email);
     }
 }

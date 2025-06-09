@@ -1,12 +1,9 @@
-﻿using Apps.Gmail.DataSourceHandler;
-using Blackbird.Applications.Sdk.Common;
-using Blackbird.Applications.Sdk.Common.Dynamic;
+﻿using Blackbird.Applications.Sdk.Common;
 
-namespace Apps.Gmail.Models.Requests
+namespace Apps.Gmail.Models.Requests;
+
+public class GetEmailRequest
 {
-    public class GetEmailRequest
-    {
-        [Display("Email ID")]
-        public string EmailId { get; set; }
-    }
+    [Display("Email ID")]
+    public string EmailId { get; set; }
 }

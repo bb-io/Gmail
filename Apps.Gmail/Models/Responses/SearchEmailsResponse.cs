@@ -1,16 +1,9 @@
-﻿using Apps.Gmail.Dtos;
-using Blackbird.Applications.Sdk.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Blackbird.Applications.Sdk.Common;
 
-namespace Apps.Gmail.Models.Responses
+namespace Apps.Gmail.Models.Responses;
+
+public class SearchEmailsResponse
 {
-    public class SearchEmailsResponse
-    {
-        [Display("Email IDs")]
-        public IEnumerable<string> EmailIds { get; set; }
-    }
+    [Display("Email IDs")]
+    public IEnumerable<string> EmailIds { get; set; }
 }

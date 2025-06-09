@@ -5,14 +5,10 @@ using Blackbird.Applications.Sdk.Common.Invocation;
 
 namespace Apps.Gmail.Auth.OAuth2;
 
-public class OAuth2TokenService : BaseInvocable ,IOAuth2TokenService
+public class OAuth2TokenService(InvocationContext invocationContext) : BaseInvocable(invocationContext) ,IOAuth2TokenService
 {
     private const string ExpiresAtKeyName = "expires_at";
     private const string TokenUrl = "https://oauth2.googleapis.com/token";
-
-    public OAuth2TokenService(InvocationContext invocationContext) : base(invocationContext)
-    {
-    }
 
     public bool IsRefreshToken(Dictionary<string, string> values)
         => values.TryGetValue(ExpiresAtKeyName, out var expireValue) &&

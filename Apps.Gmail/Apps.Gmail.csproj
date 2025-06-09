@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <Product>Gmail</Product>
     <Description>Gmail is a free email service provided by Google.</Description>
-    <Version>1.0.7</Version>
+    <Version>1.0.8</Version>
     <AssemblyName>Apps.Gmail</AssemblyName>
   </PropertyGroup>
 
@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blackbird.Applications.Sdk.Common" Version="2.9.0-alpha1" />
-    <PackageReference Include="Blackbird.Applications.SDK.Extensions.FileManagement" Version="1.0.2-alpha1" />
+    <PackageReference Include="Blackbird.Applications.Sdk.Common" Version="2.12.0" />
+    <PackageReference Include="Blackbird.Applications.SDK.Extensions.FileManagement" Version="1.0.1" />
     <PackageReference Include="Google.Apis.Gmail.v1" Version="1.68.0.3427" />
     <PackageReference Include="MimeKit" Version="4.7.1" />
     <PackageReference Include="RestSharp" Version="112.0.0" />

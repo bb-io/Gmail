@@ -28,7 +28,7 @@ public class EmailDto
         }
     }
 
-    [Display("ID")]
+    [Display("Email ID")]
     public string Id { get; set; }
 
     public string Subject { get; set; }

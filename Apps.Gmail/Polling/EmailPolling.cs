@@ -13,33 +13,52 @@ public class EmailPolling(InvocationContext invocationContext) : GmailInvocable(
     public async Task<PollingEventResponse<EmailsMemory, SearchEmailsResponse>> OnEmailsReceived(PollingEventRequest<EmailsMemory> request, [PollingEventParameter] SearchEmailsRequest searchEmailsRequest)
     {
         var emailsRequest = Client.Users.Messages.List("me");
-        emailsRequest.LabelIds = new List<string>() { "INBOX" };
-        if (!string.IsNullOrWhiteSpace(searchEmailsRequest.Query))
-            emailsRequest.Q = searchEmailsRequest.Query;
-        var emails = await emailsRequest.ExecuteAsync();
-        var ids = emails.Messages.Select(x => x.Id);
+        emailsRequest.LabelIds = new List<string> { "INBOX" };
+        emailsRequest.MaxResults = 100;
 
-        if (request.Memory is null)
+        DateTime lastTime = request.Memory?.LastTimeInteraction ?? DateTime.UtcNow.AddDays(-1);
+        long unixTimeSeconds = new DateTimeOffset(lastTime.ToUniversalTime()).ToUnixTimeSeconds();
+        string timeQuery = $"after:{unixTimeSeconds}";
+        if (!string.IsNullOrWhiteSpace(searchEmailsRequest.Query))
+            emailsRequest.Q = $"{timeQuery} {searchEmailsRequest.Query}";
+        else
+            emailsRequest.Q = timeQuery;
+
+        List<string> allIds = new List<string>();
+        string pageToken = null;
+
+        do
+        {
+            emailsRequest.PageToken = pageToken;
+            var emails = await emailsRequest.ExecuteAsync();
+            if (emails.Messages != null)
+            {
+                allIds.AddRange(emails.Messages.Select(x => x.Id));
+            }
+            pageToken = emails.NextPageToken;
+        } while (!string.IsNullOrEmpty(pageToken) && allIds.Count < 500);
+
+        var ids = allIds.AsEnumerable();
+
+        if (request.Memory is null || !ids.Any())
         {
             return new()
             {
                 FlyBird = false,
                 Memory = new()
                 {
-                    EmailIds = ids
+                    LastTimeInteraction = DateTime.UtcNow
                 }
             };
-        }            
-
-        var newIds = ids.Where(x => !request.Memory.EmailIds.Contains(x));
+        }
 
         return new()
         {
-            FlyBird = newIds.Any(),
-            Result = new SearchEmailsResponse { EmailIds = newIds },
+            FlyBird = true,
+            Result = new SearchEmailsResponse { EmailIds = ids },
             Memory = new()
             {
-                EmailIds = request.Memory.EmailIds.Concat(newIds)
+                LastTimeInteraction = DateTime.UtcNow
             }
         };
     }

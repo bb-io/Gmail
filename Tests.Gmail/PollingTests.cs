@@ -13,16 +13,17 @@ namespace Tests.Gmail
         public async Task OnNewMailReceived_IsSuccess()
         {
             var polling = new EmailPolling(InvocationContext);
-            var oldDate = DateTime.UtcNow.AddHours(5);
+            var oldDate = DateTime.UtcNow.AddHours(-10);
             var request = new PollingEventRequest<EmailsMemory>
             {
                 Memory = new EmailsMemory
                 {
-                    EmailIds = []
+                    LastTimeInteraction = oldDate
                 }
             };
             var serachRequest = new SearchEmailsRequest
             {
+                Query = "is:unread"
             };
 
             var response = polling.OnEmailsReceived(request, serachRequest);

@@ -2,5 +2,5 @@
 
 public class EmailsMemory
 {
-    public IEnumerable<string> EmailIds { get; set;}
+    public DateTime LastTimeInteraction { get; set; }
 }

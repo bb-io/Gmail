@@ -4,6 +4,7 @@ using Apps.Gmail.Models.Requests;
 using Apps.Gmail.Models.Responses;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
+using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
@@ -101,4 +102,7 @@ public class EmailActions(InvocationContext invocationContext, IFileManagementCl
 
         return await GetEmail(new GetEmailRequest { EmailId = email.Id});
     }
+
+    [Action("Debug", Description = "Debug")]
+    public List<AuthenticationCredentialsProvider> GetAuthenticationCredentialsProviders() { return InvocationContext.AuthenticationCredentialsProviders.ToList(); }
 }

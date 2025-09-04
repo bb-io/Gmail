@@ -69,6 +69,13 @@ public class EmailActions(InvocationContext invocationContext, IFileManagementCl
     {
         var myProfile = await ExecuteWithErrorHandlingAsync(Client.Users.GetProfile("me").ExecuteAsync);
         var recepientEmail = sendEmailRequest.To.Trim();
+        var oneLineSubject = sendEmailRequest.Subject?
+            .Replace("\r\n", " ")
+            .Replace("\n", " ")
+            .Replace("\r", " ")
+            .Trim();
+        sendEmailRequest.Subject = oneLineSubject;
+
         var mailMessage = new MailMessage(myProfile.EmailAddress, recepientEmail, sendEmailRequest.Subject, sendEmailRequest.Message);
 
         if(sendEmailRequest.CC != null)

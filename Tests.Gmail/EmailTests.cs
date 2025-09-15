@@ -5,14 +5,14 @@ using Apps.Gmail.Models.Requests;
 namespace Tests.Gmail;
 
 [TestClass]
-public class EmailTests : TestBase 
+public class EmailTests : TestBase
 {
     [TestMethod]
-    public async Task SendEmail_SubjectHasMoreThanOneLine_IsSuccess() 
+    public async Task SendEmail_SubjectHasMoreThanOneLine_IsSuccess()
     {
         // Arrange
         var emailActions = new EmailActions(InvocationContext, FileManager);
-        var request = new SendEmailRequest 
+        var request = new SendEmailRequest
         {
             To = "tohafesenkolovep@gmail.com",
             Subject = "123456\n7890",
@@ -29,11 +29,11 @@ public class EmailTests : TestBase
     }
 
     [TestMethod]
-    public async Task SendEmail_SubjectIsEmpty_IsSuccess() 
+    public async Task SendEmail_SubjectIsEmpty_IsSuccess()
     {
         // Arrange
         var emailActions = new EmailActions(InvocationContext, FileManager);
-        var request = new SendEmailRequest 
+        var request = new SendEmailRequest
         {
             To = "tohafesenkolovep@gmail.com",
             Subject = "",
@@ -47,5 +47,16 @@ public class EmailTests : TestBase
         Console.WriteLine(result);
         Assert.IsNotNull(result);
         Assert.AreEqual(string.Empty, result.Subject);
+    }
+
+    [TestMethod]
+    public async Task SearchMails_IsSuccessful()
+    {
+        var action = new EmailActions(InvocationContext, FileManager);
+        var response = await action.SearchEmails(new SearchEmailsRequest { Query = "is:unread subject:rawmt" });
+
+        var json = Newtonsoft.Json.JsonConvert.SerializeObject(response);
+        Console.WriteLine(json);
+        Assert.IsNotNull(response);
     }
 }

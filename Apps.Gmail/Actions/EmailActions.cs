@@ -32,7 +32,7 @@ public class EmailActions(InvocationContext invocationContext, IFileManagementCl
         }
         
         var emails = await ExecuteWithErrorHandlingAsync(emailsRequest.ExecuteAsync);
-        return new() { EmailIds = emails.Messages.Select(x => x.Id) };
+        return new() { EmailIds = emails?.Messages?.Select(x => x.Id) ?? Enumerable.Empty<string>() };
     }
 
     [Action("Get email", Description = "Returns email metadata, message and all attachments")]

@@ -15,7 +15,7 @@ using System.Text;
 
 namespace Apps.Gmail.Actions;
 
-[ActionList]
+[ActionList("Emails")]
 public class EmailActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) : GmailInvocable(invocationContext)
 {
     private readonly IFileManagementClient _fileManagementClient = fileManagementClient;

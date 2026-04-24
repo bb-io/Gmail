@@ -5,7 +5,7 @@ namespace Apps.Gmail.Models.Requests;
 
 public class SendEmailRequest
 {
-    [Display("Receiver name")]
+    [Display("Recipient email")]
     public string To { get; set; }
 
     public string? Subject { get; set; }

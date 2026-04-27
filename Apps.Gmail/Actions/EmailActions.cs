@@ -5,6 +5,7 @@ using Apps.Gmail.Models.Responses;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Authentication;
+using Blackbird.Applications.Sdk.Common.Exceptions;
 using Blackbird.Applications.Sdk.Common.Files;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
@@ -67,8 +68,10 @@ public class EmailActions(InvocationContext invocationContext, IFileManagementCl
     [Action("Send email", Description = "Sends an email, including attachments")]
     public async Task<EmailDto> SendEmail([ActionParameter] SendEmailRequest sendEmailRequest)
     {
-        var myProfile = await ExecuteWithErrorHandlingAsync(Client.Users.GetProfile("me").ExecuteAsync);
-        var recepientEmail = sendEmailRequest.To.Trim();
+        var recepientEmail = ValidateEmailAddress(sendEmailRequest.To, "Recipient");
+        var ccEmails = sendEmailRequest.CC?
+            .Select(ccEmail => ValidateEmailAddress(ccEmail, "CC"))
+            .ToList();
         var oneLineSubject = sendEmailRequest.Subject?
             .Replace("\r\n", " ")
             .Replace("\n", " ")
@@ -76,11 +79,12 @@ public class EmailActions(InvocationContext invocationContext, IFileManagementCl
             .Trim();
         sendEmailRequest.Subject = oneLineSubject;
 
+        var myProfile = await ExecuteWithErrorHandlingAsync(Client.Users.GetProfile("me").ExecuteAsync);
         var mailMessage = new MailMessage(myProfile.EmailAddress, recepientEmail, sendEmailRequest.Subject, sendEmailRequest.Message);
 
-        if(sendEmailRequest.CC != null)
+        if(ccEmails != null)
         {
-            foreach(var ccEmail in sendEmailRequest.CC)
+            foreach(var ccEmail in ccEmails)
             {
                 mailMessage.CC.Add(ccEmail);
             }        
@@ -112,4 +116,21 @@ public class EmailActions(InvocationContext invocationContext, IFileManagementCl
 
     [Action("Debug", Description = "Debug")]
     public List<AuthenticationCredentialsProvider> GetAuthenticationCredentialsProviders() { return InvocationContext.AuthenticationCredentialsProviders.ToList(); }
+
+    private static string ValidateEmailAddress(string? email, string fieldName)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            throw new PluginApplicationException($"{fieldName} email is required.");
+        }
+
+        try
+        {
+            return new MailAddress(email.Trim()).Address;
+        }
+        catch (FormatException ex)
+        {
+            throw new PluginApplicationException($"{fieldName} email '{email}' is not a valid e-mail address.", ex);
+        }
+    }
 }

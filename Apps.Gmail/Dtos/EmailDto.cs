@@ -19,13 +19,7 @@ public class EmailDto
         To = (toFull != null && toFull.Contains(" <")) ? toFull.Split(" <")[0] : toFull;
         ToEmail = (toFull != null && toFull.Contains(" <")) ? toFull.Split(" <")[1].TrimEnd('>') : toFull;
 
-        var bodyBase64 = message.Payload.Body.Data == null ? (message.Payload.Parts.FirstOrDefault(x => x.MimeType == "text/plain")?.Body.Data ?? "") : message.Payload.Body.Data;
-
-        if (bodyBase64 != null)
-        {
-            var base64EncodedBytes = Convert.FromBase64String(bodyBase64.Replace("-", "+").Replace("_", "/"));
-            Message = Encoding.UTF8.GetString(base64EncodedBytes);
-        }
+        Message = GetMessageBody(message.Payload);
     }
 
     [Display("Email ID")]
@@ -49,5 +43,63 @@ public class EmailDto
 
     public string Message { get; set; }
 
-    public IEnumerable<FileReference> Attachments { get; set; }
+    public IEnumerable<FileReference> Attachments { get; set; } = Enumerable.Empty<FileReference>();
+
+    private static string GetMessageBody(MessagePart payload)
+    {
+        var bodyParts = Traverse(payload)
+            .Where(x => !IsAttachment(x))
+            .ToList();
+
+        var bodyPart = bodyParts.FirstOrDefault(x =>
+                           string.Equals(x.MimeType, "text/plain", StringComparison.OrdinalIgnoreCase) &&
+                           !string.IsNullOrEmpty(x.Body?.Data))
+                       ?? bodyParts.FirstOrDefault(x =>
+                           string.Equals(x.MimeType, "text/html", StringComparison.OrdinalIgnoreCase) &&
+                           !string.IsNullOrEmpty(x.Body?.Data));
+
+        // Preserve support for a non-multipart payload even if Gmail omitted its MIME type.
+        var bodyBase64 = bodyPart?.Body?.Data ?? payload.Body?.Data;
+        return string.IsNullOrEmpty(bodyBase64) ? string.Empty : DecodeBase64Url(bodyBase64);
+    }
+
+    private static IEnumerable<MessagePart> Traverse(MessagePart part)
+    {
+        yield return part;
+
+        if (part.Parts == null)
+        {
+            yield break;
+        }
+
+        foreach (var child in part.Parts)
+        {
+            foreach (var descendant in Traverse(child))
+            {
+                yield return descendant;
+            }
+        }
+    }
+
+    private static bool IsAttachment(MessagePart part)
+    {
+        if (!string.IsNullOrEmpty(part.Filename))
+        {
+            return true;
+        }
+
+        var contentDisposition = part.Headers?
+            .FirstOrDefault(x => string.Equals(x.Name, "Content-Disposition", StringComparison.OrdinalIgnoreCase))?
+            .Value;
+
+        return contentDisposition?.StartsWith("attachment", StringComparison.OrdinalIgnoreCase) == true;
+    }
+
+    private static string DecodeBase64Url(string value)
+    {
+        var base64 = value.Replace("-", "+").Replace("_", "/");
+        base64 = base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '=');
+
+        return Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+    }
 }
